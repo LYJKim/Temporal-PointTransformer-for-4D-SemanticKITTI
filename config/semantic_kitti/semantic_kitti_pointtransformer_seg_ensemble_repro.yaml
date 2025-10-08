@@ -1,0 +1,52 @@
+DATA:
+  data_name: semantic_kitti        # 기존과 구분하기 위해 이름 부여
+  data_root: /root/dataset/semantickitti/sequences/train
+  classes: 19                         # 실제 label 개수 (ignore 제외)
+  fea_dim: 2                          # [intensity, Δt]
+  voxel_size: 0.1
+  voxel_max: 80000*3          # t-2, t-1, t 프레임 합 기준
+  loop: 1
+  max_frames_per_seq: 100     # 각 시퀀스별 최대 프레임 수
+
+TRAIN:
+  arch: pointtransformer_seg_ensemble_repro       # 3프레임 앙상블 모델
+  use_xyz: True
+  sync_bn: False
+  ignore_label: 255
+  train_gpu: [4, 5, 0]
+  workers: 0
+  batch_size: 4
+  batch_size_val: 4
+  base_lr: 0.5
+  epochs: 5
+  start_epoch: 0
+  step_epoch: 30
+  multiplier: 0.1
+  momentum: 0.9
+  weight_decay: 0.0001
+  drop_rate: 0.5
+  manual_seed: 7777
+  print_freq: 1
+  save_freq: 1
+  save_path: exp/semantic_kitti_ensemble   # 실험 결과 저장 경로
+  weight:
+  resume:
+  evaluate: True
+  eval_freq: 1
+
+Distributed:
+  dist_url: tcp://localhost:8888
+  dist_backend: 'nccl'
+  multiprocessing_distributed: True
+  world_size: 1
+  rank: 0
+
+TEST:
+  test_list: dataset/semantic_kitti/list/test.txt
+  split: val
+  test_gpu: [4]
+  test_workers: 0
+  batch_size_test: 4
+  model_path:
+  save_folder:
+  names_path: data/semantic_kitti/semantic_kitti_names.txt 
